@@ -9,7 +9,7 @@ import java.util.Date;
  * @author Exrickx
  */
 @Entity
-@Table(name = "t_pay")
+@Table(name = "payRecord")
 public class Pay implements Serializable{
 
     /**

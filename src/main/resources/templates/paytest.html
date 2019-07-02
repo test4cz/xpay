@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>11111</title>
+        <meta name="description" content="XPay个人收款支付系统 无需签约 无需第三方SDK 完全免费">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .main{
+                margin-top: 40px;
+                text-align: center;
+            }
+            .text{
+                margin-top: 10px;
+            }
+        </style>
+        <script src="assets/js/vendor/jquery-1.11.2.min.js"></script>
+
+
+    </head>
+
+    <body>
+    <div>支付渠道:cdcdx</div>
+  <div>订单号: <span th:text=" ${orderId}" id="orderId"></span></div>
+  <div>金额： <span th:text=" ${amount}" id="amount"></span></div>
+       支付方式： <select id="paytype" onchange="change()">
+            <option value="1" selected>微信</option>
+            <option value="2" >支付宝</option>
+            <option value="3" >QQ钱包</option>
+
+        </select>
+<br>
+    <br>
+    <br>
+<pre>
+    1、根据金额不同，展示相应金额的收款二维码
+    2、自定义金额，请一定要备注订单号
+</pre>
+
+  <h5 id="note">请向以下二维码支付<span th:text=" ${amount}"/>元</h5>
+<img src="" id="img"/>
+
+    </body>
+    <script>
+
+
+       function change(){
+       var orderId=$("#orderId").text();
+            var amount=$("#amount").text();
+            var type=$("#paytype").val();
+            $('#img').attr('src','/pay/'+type+'/a'+orderId+'/'+amount+'?='+new Date());
+            }
+
+
+
+    </script>
+</html>

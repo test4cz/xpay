@@ -21,15 +21,15 @@ public class PageController {
 
     private static final Logger log= LoggerFactory.getLogger(PageController.class);
 
-    @RequestMapping("/")
-    public String index(){
+//    @RequestMapping("/")
+//    public String index(){
+//
+//        return "index";
+//    }
 
-        return "index";
-    }
-
-    @RequestMapping("/{page}")
-    public String showPage(@PathVariable String page){
-
-        return page;
-    }
+//    @RequestMapping("/{page}")
+//    public String showPage(@PathVariable String page){
+//
+//        return page;
+//    }
 }

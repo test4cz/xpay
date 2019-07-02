@@ -6,6 +6,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.text.DecimalFormat;
+import java.util.Random;
+
 /**
  * @author Exrickx
  */
@@ -19,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class XpayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(XpayApplication.class, args);
+
+                SpringApplication.run(XpayApplication.class, args);
     }
 }

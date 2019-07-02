@@ -1,17 +1,18 @@
 package cn.exrick.service.impl;
 
 import cn.exrick.bean.Pay;
-import cn.exrick.common.utils.StringUtils;
+import cn.exrick.bean.PayRecord;
 import cn.exrick.dao.PayDao;
 import cn.exrick.service.PayService;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * @author Exrickx
@@ -25,16 +26,16 @@ public class PayServiceImpl implements PayService {
     private PayDao payDao;
 
     @Override
-    public List<Pay> getPayList(Integer state) {
+    public List<Map<String,Object>> getPayList(Integer state) {
 
-        List<Pay> list=payDao.getByStateIs(state);
-        for(Pay pay:list){
-            //屏蔽隐私数据
-            pay.setId("");
-            pay.setEmail("");
-            pay.setTestEmail("");
-            pay.setUsername("");
-        }
+        List<Map<String,Object>> list= payDao.getByStateIs(state);
+//        for(Pay pay:list){
+//            //屏蔽隐私数据
+//            pay.setId("");
+//            pay.setEmail("");
+//            pay.setTestEmail("");
+//            pay.setUsername("");
+//        }
         return list;
     }
 
@@ -55,9 +56,10 @@ public class PayServiceImpl implements PayService {
     @Override
     public Pay getPay(String id) {
 
-        Pay pay=payDao.findOne(id);
-        pay.setTime(StringUtils.getTimeStamp(pay.getCreateTime()));
-        return pay;
+//        Pay pay=payDao.findOne(id);
+//        pay.setTime(StringUtils.getTimeStamp(pay.getCreateTime()));
+//        return pay;
+        return  null;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class PayServiceImpl implements PayService {
         pay.setId(UUID.randomUUID().toString());
         pay.setCreateTime(new Date());
         pay.setState(0);
-        payDao.save(pay);
+//        payDao.save(pay);
         return 1;
     }
 
@@ -74,7 +76,7 @@ public class PayServiceImpl implements PayService {
     public int updatePay(Pay pay) {
 
         pay.setUpdateTime(new Date());
-        payDao.saveAndFlush(pay);
+//        payDao.saveAndFlush(pay);
         return 1;
     }
 
@@ -84,14 +86,43 @@ public class PayServiceImpl implements PayService {
         Pay pay=getPay(id);
         pay.setState(state);
         pay.setUpdateTime(new Date());
-        payDao.saveAndFlush(pay);
+//        payDao.saveAndFlush(pay);
         return 1;
     }
 
     @Override
     public int delPay(String id) {
 
-        payDao.delete(id);
+//        payDao.delete(id);
         return 1;
     }
+
+    @Override
+    public String getRandomPayQRImg(Integer type, String account,String amount,String channel) {
+        List<Map<String,Object>> result=payDao.findAccountByType(type);
+        int max=result.size()-1,min=0;
+        int randNumber =max<=0?0:new Random().nextInt(max - min + 1) + min;
+        Map<String,Object> map= result.get(randNumber);
+
+        PayRecord record=new PayRecord();
+        try {
+            BeanUtils.populate(record,map);
+            record.setPayAccount(account);
+            record.setChannel(channel);
+            record.setCreateTime(new Date());
+            record.setState(0);
+            record.setAmount(new BigDecimal(amount));
+            payDao.savePayRecord(record);
+             return record.getReceiveQrImg();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+
+
+        return null;
+    }
+
 }

@@ -29,7 +29,9 @@ public class RedisUtils {
         }
         return temp;
     }
-
+    public boolean hasKey(String key){
+        return stringRedisTemplate.hasKey(key);
+    }
     public void set(String key,String value,Long time,TimeUnit timeUnit){
 
         try {

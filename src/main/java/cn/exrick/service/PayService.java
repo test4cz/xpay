@@ -3,6 +3,7 @@ package cn.exrick.service;
 import cn.exrick.bean.Pay;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Exrickx
@@ -14,7 +15,7 @@ public interface PayService {
      * @param state
      * @return
      */
-    List<Pay> getPayList(Integer state);
+    List<Map<String,Object>> getPayList(Integer state);
 
     /**
      * 获得未支付表
@@ -57,4 +58,7 @@ public interface PayService {
      * @return
      */
     int delPay(String id);
+
+
+    String getRandomPayQRImg(Integer type, String account,String amount,String channel);
 }

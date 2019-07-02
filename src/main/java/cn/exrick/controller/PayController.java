@@ -11,15 +11,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -70,11 +75,12 @@ public class PayController {
     public DataTablesResult getThanksList(){
 
         DataTablesResult result=new DataTablesResult();
-        List<Pay> list=new ArrayList<>();
+        List<Map<String,Object>> list=new ArrayList<>();
         try {
             list=payService.getPayList(1);
 
         }catch (Exception e){
+            e.printStackTrace();
             result.setSuccess(false);
             result.setError("获取捐赠列表失败");
             return result;
@@ -102,6 +108,59 @@ public class PayController {
         result.setSuccess(true);
         return result;
     }
+    @RequestMapping(value = "/paytest",method = RequestMethod.GET)
+    public  String  payinit(Model mode){
+        mode.addAttribute("orderId",Math.abs(new Random().nextLong()));
+        mode.addAttribute("amount",new DecimalFormat("0.00").format(new Random().nextDouble()));
+
+        return "paytest";
+    }
+    @RequestMapping(value = "/pay/{type}/{account}/{amount}",method = RequestMethod.GET,produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public  byte[]  payinit(@PathVariable Integer type, @PathVariable String account,@PathVariable String amount,HttpServletRequest request){
+        //获取一个收款帐号,写入待支付记录,返回一个收款二维码图片
+        if(type!=1&&type!=2&&type!=3){
+            return null;
+        }
+        //防炸库验证
+//        String ip= IpInfoUtils.getIpAddr(request);
+//        if("0:0:0:0:0:0:0:1".equals(ip)){
+//            ip="127.0.0.1";
+//        }
+//        String temp=redisUtils.get(ip);
+//        if(StringUtils.isNotBlank(temp)){
+//           System.out.println(ip+"您提交的太频繁啦,！请1分钟后再试");
+//           return null;
+//        }else {
+//            //记录缓存
+//            redisUtils.set(ip,"added",1L, TimeUnit.MINUTES);
+//        }
+
+
+
+
+        try {
+            String key=account+"_"+type,qrPath="";
+            if(redisUtils.hasKey(key)){
+                qrPath=redisUtils.get(key);
+            }else {
+                qrPath = payService.getRandomPayQRImg(type, account, amount,"cdcdx");
+                redisUtils.set(key, qrPath, 30L, TimeUnit.MINUTES);
+            }
+            FileInputStream inputStream = new FileInputStream(qrPath);
+
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes, 0, inputStream.available());
+            return bytes;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+
+        }
+    return null;
+
+    }
 
     @RequestMapping(value = "/pay/check/list",method = RequestMethod.GET)
     @ApiOperation(value = "获取支付审核列表")
@@ -109,7 +168,7 @@ public class PayController {
     public DataTablesResult getCheckList(){
 
         DataTablesResult result=new DataTablesResult();
-        List<Pay> list=new ArrayList<>();
+        List<Map<String,Object>> list=new ArrayList<>();
         try {
             list=payService.getPayList(0);
         }catch (Exception e){
